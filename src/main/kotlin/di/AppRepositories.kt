@@ -1,8 +1,22 @@
 package com.example.di
 
-import io.ktor.server.application.Application
-import io.ktor.server.config.getAs
+import com.example.core.domain.Repository
+import com.example.user.data.repository.AddressRepositoryImpl
+import com.example.user.data.repository.ProfileRepositoryImpl
+import com.example.user.data.repository.UserRepositoryImpl
+import com.example.user.data.table.AddressTable
+import com.example.user.data.table.ProfileTable
+import com.example.user.data.table.UserTable
+import com.example.user.domain.AddressError
+import com.example.user.domain.ProfileError
+import com.example.user.domain.models.Address
+import com.example.user.domain.models.Profile
+import com.example.user.domain.repository.UserRepository
+import io.ktor.server.application.*
+import io.ktor.server.config.*
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.dsl.module
 
 fun Application.appRepositories() = module {
@@ -14,10 +28,16 @@ fun Application.appRepositories() = module {
         val host = environment.config.property("database.host").getAs<String>()
         val port = environment.config.property("database.port").getAs<Int>()
 
-        Database.connect(
-            url = "jdbc:$driver://$host:$port/$name",
-            user = user,
-            password = password
-        )
+        val database = Database.connect(url = "jdbc:$driver://$host:$port/$name", user = user, password = password)
+
+        transaction(database) {
+            SchemaUtils.create(UserTable, ProfileTable, AddressTable)
+            SchemaUtils.addMissingColumnsStatements(UserTable, ProfileTable, AddressTable)
+        }
+
+        database
     }
+    single<Repository<Address, AddressError>> { AddressRepositoryImpl(database = get()) }
+    single<Repository<Profile, ProfileError>> { ProfileRepositoryImpl(database = get()) }
+    single<UserRepository> { UserRepositoryImpl(database = get()) }
 }

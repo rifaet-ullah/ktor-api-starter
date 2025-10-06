@@ -29,7 +29,7 @@ class AddUser(
             is Result.Success -> Result.Failure(UserError.ALREADY_EXIST)
             is Result.Failure -> {
                 val profileResult = profileRepository.add(
-                    data = Profile(
+                    item = Profile(
                         firstName = firstName,
                         lastName = lastName,
                         dateOfBirth = dateOfBirth,
@@ -39,7 +39,7 @@ class AddUser(
                     is Result.Failure -> Result.Failure(UserError.UNKNOWN)
                     is Result.Success -> {
                         userRepository.add(
-                            data = User(
+                            User(
                                 profile = profileResult.data,
                                 email = email,
                                 password = passwordService.generate(password),
