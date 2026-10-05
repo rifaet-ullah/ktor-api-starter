@@ -23,15 +23,15 @@ class AddressRepositoryImpl(private val database: Database) : Repository<Address
             }
         }
 
-        return Result.Success(data = entity.toAddress())
+        return Result.Ok(data = entity.toAddress())
     }
 
     override suspend fun getById(id: Long): Result<Address, AddressError> {
         val entity = newSuspendedTransaction(Dispatchers.IO, database) {
             AddressEntity.findById(id)
-        } ?: return Result.Failure(AddressError.NOT_FOUND)
+        } ?: return Result.Error(AddressError.NOT_FOUND)
 
-        return Result.Success(data = entity.toAddress())
+        return Result.Ok(data = entity.toAddress())
     }
 
     override suspend fun update(item: Address): Result<Address, AddressError> {
@@ -44,17 +44,17 @@ class AddressRepositoryImpl(private val database: Database) : Repository<Address
                 it.postalCode = item.postalCode
                 it.country = item.country
             }
-        } ?: return Result.Failure(AddressError.NOT_FOUND)
+        } ?: return Result.Error(AddressError.NOT_FOUND)
 
-        return Result.Success(data = entity.toAddress())
+        return Result.Ok(data = entity.toAddress())
     }
 
     override suspend fun delete(id: Long): Result<Unit, AddressError> {
         val entity = newSuspendedTransaction(Dispatchers.IO, database) {
             AddressEntity.findById(id)
-        } ?: return Result.Failure(AddressError.NOT_FOUND)
+        } ?: return Result.Error(AddressError.NOT_FOUND)
 
         entity.delete()
-        return Result.Success(Unit)
+        return Result.Ok(Unit)
     }
 }

@@ -1,6 +1,7 @@
 package com.example.di
 
 import com.example.user.domain.use_case.AddUser
+import com.example.user.domain.use_case.GetUsers
 import com.example.user.domain.use_case.UpdateAddress
 import com.example.user.domain.use_case.UpdatePassword
 import com.example.user.domain.use_case.UpdateProfile
@@ -11,4 +12,5 @@ fun appUseCases() = module {
     factory { UpdateAddress(userRepository = get(), profileRepository = get(), addressRepository = get()) }
     factory { UpdateProfile(userRepository = get(), profileRepository = get(), addressRepository = get()) }
     factory { UpdatePassword(userRepository = get(), passwordService = get()) }
+    factory { GetUsers(userRepository = get()) }
 }

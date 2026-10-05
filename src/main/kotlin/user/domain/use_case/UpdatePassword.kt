@@ -8,22 +8,22 @@ import com.example.user.domain.service.PasswordService
 
 class UpdatePassword(private val userRepository: UserRepository, private val passwordService: PasswordService) {
     suspend operator fun invoke(userId: Long, oldPassword: String, newPassword: String): Result<User, UserError> {
-        return when (val userResult = userRepository.getById(userId)) {
-            is Result.Failure -> Result.Failure(UserError.NOT_FOUND)
-            is Result.Success -> {
-                val validPassword = passwordService.verify(
-                    password = oldPassword, hashedPassword = userResult.data.password
-                )
-                if (!validPassword) return Result.Failure(UserError.WRONG_PASSWORD)
+        val user = when (val userResult = userRepository.getById(userId)) {
+            is Result.Error -> return Result.Error(UserError.USER_NOT_FOUND)
+            is Result.Ok -> userResult.data
+        }
 
-                val updatedUserResult = userRepository.update(
-                    userResult.data.copy(password = passwordService.generate(newPassword))
-                )
-                when(updatedUserResult) {
-                    is Result.Failure -> Result.Failure(UserError.UNKNOWN)
-                    is Result.Success -> userResult
-                }
-            }
+        val validPassword = passwordService.verify(
+            password = oldPassword, hashedPassword = user.password
+        )
+        if (!validPassword) return Result.Error(UserError.WRONG_PASSWORD)
+
+        val updatedUserResult = userRepository.update(
+            user.copy(password = passwordService.generate(newPassword))
+        )
+        return when (updatedUserResult) {
+            is Result.Error -> Result.Error(UserError.UNKNOWN)
+            is Result.Ok -> Result.Ok(user)
         }
     }
 }

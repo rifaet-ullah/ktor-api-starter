@@ -23,15 +23,15 @@ class ProfileRepositoryImpl(private val database: Database) : Repository<Profile
             }
         }
 
-        return Result.Success(data = dao.toProfile())
+        return Result.Ok(data = dao.toProfile())
     }
 
     override suspend fun getById(id: Long): Result<Profile, ProfileError> {
         val entity = newSuspendedTransaction(Dispatchers.IO, database) {
             ProfileEntity.findById(id)
-        } ?: return Result.Failure(ProfileError.NOT_FOUND)
+        } ?: return Result.Error(ProfileError.NOT_FOUND)
 
-        return Result.Success(data = entity.toProfile())
+        return Result.Ok(data = entity.toProfile())
     }
 
     override suspend fun update(item: Profile): Result<Profile, ProfileError> {
@@ -43,17 +43,17 @@ class ProfileRepositoryImpl(private val database: Database) : Repository<Profile
                 it.address = item.address?.let { address -> AddressEntity.findById(address.id) }
                 it.pictureUri = item.pictureUri
             }
-        } ?: return Result.Failure(ProfileError.NOT_FOUND)
+        } ?: return Result.Error(ProfileError.NOT_FOUND)
 
-        return Result.Success(data = entity.toProfile())
+        return Result.Ok(data = entity.toProfile())
     }
 
     override suspend fun delete(id: Long): Result<Unit, ProfileError> {
         val entity = newSuspendedTransaction(Dispatchers.IO, database) {
             ProfileEntity.findById(id)
-        } ?: return Result.Failure(ProfileError.NOT_FOUND)
+        } ?: return Result.Error(ProfileError.NOT_FOUND)
 
         entity.delete()
-        return Result.Success(Unit)
+        return Result.Ok(Unit)
     }
 }

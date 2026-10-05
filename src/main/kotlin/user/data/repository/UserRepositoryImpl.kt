@@ -16,9 +16,9 @@ class UserRepositoryImpl(private val database: Database) : UserRepository {
     override suspend fun getByEmail(email: String): Result<User, UserError> {
         val entity = newSuspendedTransaction(Dispatchers.IO, database) {
             UserEntity.find { UserTable.email eq email }.firstOrNull()
-        } ?: return Result.Failure(UserError.NOT_FOUND)
+        } ?: return Result.Error(UserError.NOT_FOUND)
 
-        return Result.Success(data = entity.toUser())
+        return Result.Ok(data = entity.toUser())
     }
 
     override suspend fun add(item: User): Result<User, UserError> {
@@ -34,17 +34,17 @@ class UserRepositoryImpl(private val database: Database) : UserRepository {
                 dateJoined = item.dateJoined
                 lastLogin = item.lastLogin
             }
-        } ?: return Result.Failure(UserError.NOT_FOUND)
+        } ?: return Result.Error(UserError.NOT_FOUND)
 
-        return Result.Success(data = entity.toUser())
+        return Result.Ok(data = entity.toUser())
     }
 
     override suspend fun getById(id: Long): Result<User, UserError> {
         val entity = newSuspendedTransaction(Dispatchers.IO, database) {
             UserEntity.find { UserTable.id eq id }.firstOrNull()
-        } ?: return Result.Failure(UserError.NOT_FOUND)
+        } ?: return Result.Error(UserError.NOT_FOUND)
 
-        return Result.Success(data = entity.toUser())
+        return Result.Ok(data = entity.toUser())
     }
 
     override suspend fun update(item: User): Result<User, UserError> {
@@ -60,17 +60,17 @@ class UserRepositoryImpl(private val database: Database) : UserRepository {
                 it.dateJoined = item.dateJoined
                 it.lastLogin = item.lastLogin
             }
-        } ?: return Result.Failure(UserError.NOT_FOUND)
+        } ?: return Result.Error(UserError.NOT_FOUND)
 
-        return Result.Success(data = entity.toUser())
+        return Result.Ok(data = entity.toUser())
     }
 
     override suspend fun delete(id: Long): Result<Unit, UserError> {
         val entity = newSuspendedTransaction(Dispatchers.IO, database) {
             UserEntity.find { UserTable.id eq id }.firstOrNull()
-        } ?: return Result.Failure(UserError.NOT_FOUND)
+        } ?: return Result.Error(UserError.NOT_FOUND)
 
         entity.delete()
-        return Result.Success(Unit)
+        return Result.Ok(Unit)
     }
 }
