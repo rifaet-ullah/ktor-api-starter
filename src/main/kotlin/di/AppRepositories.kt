@@ -7,8 +7,7 @@ import com.example.user.data.repository.UserRepositoryImpl
 import com.example.user.data.table.AddressTable
 import com.example.user.data.table.ProfileTable
 import com.example.user.data.table.UserTable
-import com.example.user.domain.AddressError
-import com.example.user.domain.ProfileError
+import com.example.user.domain.UserError
 import com.example.user.domain.models.Address
 import com.example.user.domain.models.Profile
 import com.example.user.domain.repository.UserRepository
@@ -37,7 +36,7 @@ fun Application.appRepositories() = module {
 
         database
     }
-    single<Repository<Address, AddressError>> { AddressRepositoryImpl(database = get()) }
-    single<Repository<Profile, ProfileError>> { ProfileRepositoryImpl(database = get()) }
+    single<Repository<Address, UserError>> { AddressRepositoryImpl(database = get()) }
+    single<Repository<Profile, UserError>> { ProfileRepositoryImpl(database = get()) }
     single<UserRepository> { UserRepositoryImpl(database = get()) }
 }
